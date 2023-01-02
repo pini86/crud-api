@@ -2,8 +2,10 @@
   "name": "crud-api",
   "version": "1.0.0",
   "description": "CRUD API",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "scripts": {
+    "start:dev": "nodemon --watch ./src/ts ./src/ts/index.ts",
+    "start:prod": "tsc && node src/js/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
