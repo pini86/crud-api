@@ -3,7 +3,7 @@ import { IUser } from "../Interfaces/user";
 
 let usersDatabase: IUser[] = [];
 
-async function createNewUser(user: IUser): Promise<IUser> {
+async function createNewUserInDB(user: IUser): Promise<IUser> {
   return new Promise((resolve, reject) => {
     const newUser = { ...user, id: uuid.v4() };
     usersDatabase.push(newUser);
@@ -11,11 +11,11 @@ async function createNewUser(user: IUser): Promise<IUser> {
   });
 }
 
-async function getAllUsers(): Promise<IUser[]> {
+async function getAllUsersFromDB(): Promise<IUser[]> {
   return new Promise((resolve, reject) => resolve(usersDatabase));
 }
 
-async function getUserById(id: string): Promise<IUser | null> {
+async function getUserByIdFromDB(id: string): Promise<IUser | null> {
   return new Promise((resolve, reject) => {
     const user = usersDatabase.find((user) => id === user.id);
     if (user) {
@@ -26,22 +26,19 @@ async function getUserById(id: string): Promise<IUser | null> {
   });
 }
 
-async function updateUserById(
-  id: string,
-  userData: IUser
-): Promise<IUser | null> {
+async function updateUserInDB(userData: IUser): Promise<IUser> {
   return new Promise((resolve, reject) => {
-    const index = usersDatabase.findIndex((user) => id === user.id);
-    usersDatabase[index] = { ...userData, id };
-    if (index) {
-      resolve(usersDatabase[index]);
-    } else {
+    const index = usersDatabase.findIndex((user) => userData.id === user.id);
+    usersDatabase[index] = { ...userData, id: userData.id };
+    //if (index) {
+    resolve(usersDatabase[index]);
+    /*  } else {
       reject(null);
-    }
+    } */
   });
 }
 
-async function deleteUserById(id: string): Promise<boolean> {
+async function deleteUserByIdInDB(id: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     /*  usersDatabase = usersDatabase.filter((user) => user.id !== id);
     resolve(); */
@@ -56,9 +53,9 @@ async function deleteUserById(id: string): Promise<boolean> {
 }
 
 export {
-  createNewUser,
-  getAllUsers,
-  getUserById,
-  updateUserById,
-  deleteUserById,
+  createNewUserInDB,
+  getAllUsersFromDB,
+  getUserByIdFromDB,
+  updateUserInDB,
+  deleteUserByIdInDB,
 };
