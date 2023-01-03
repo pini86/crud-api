@@ -1,11 +1,11 @@
 const ERROR_MESSAGES = {
-  USERID_INVALID: "User id is invalid",
-  USER_NOT_FOUND: "User not found",
-  BODY_INVALID_FORMAT: "Invalid request body format",
-  BODY_VALIDATION: "Request body does not contain required fields",
-  UNSUPPORTED_OPERATION: "Unsupported operation",
-  RESOURCE_NOT_FOUND: "Requested resource doesn't exist",
-  UNEXPECTED_ERROR: "Unexpected error has occured, try again later",
+  BODY_INVALID_FORMAT: "Invalid request body format.",
+  USER_NOT_FOUND: "User not found.",
+  BODY_VALIDATION: "Request body does not contain required fields.",
+  RESOURCE_NOT_FOUND: "Requested resource not found.",
+  UNEXPECTED_ERROR: "Unexpected error has occured : ",
+  USERID_INVALID: "User id is not valid.",
+  INTERNAL_SERVER_ERROR: "Internal server error.",
 };
 
 const HTTP_CODE = {

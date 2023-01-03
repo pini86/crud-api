@@ -1,11 +1,11 @@
-import * as http from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import { IUser } from "../Interfaces/user";
 import { createResponse } from "../Utils/utils";
-import { HTTP_CODE } from "../Constants/constants";
+import { HTTP_CODE, ERROR_MESSAGES } from "../Constants/constants";
 
 const parseRequest = async (
-  request: http.IncomingMessage,
-  response: http.ServerResponse
+  request: IncomingMessage,
+  response: ServerResponse
 ): Promise<IUser> =>
   new Promise((resolve, reject) => {
     try {
@@ -20,7 +20,7 @@ const parseRequest = async (
           } catch (err) {
             createResponse(
               HTTP_CODE.INTERNAL_SERVER_ERROR,
-              { message: "Server side error while parsing request." },
+              { message: ERROR_MESSAGES.BODY_INVALID_FORMAT },
               response
             );
             reject(err);
@@ -30,7 +30,7 @@ const parseRequest = async (
     } catch (err) {
       createResponse(
         HTTP_CODE.INTERNAL_SERVER_ERROR,
-        { message: "Server side error." },
+        { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
         response
       );
       reject(err);

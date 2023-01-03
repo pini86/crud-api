@@ -1,4 +1,4 @@
-import http from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import {
   createNewUserInDB,
   getAllUsersFromDB,
@@ -7,26 +7,27 @@ import {
   deleteUserByIdInDB,
 } from "../Database/database";
 import { createResponse } from "../Utils/utils";
-import { HTTP_CODE } from "../Constants/constants";
+import { HTTP_CODE, ERROR_MESSAGES } from "../Constants/constants";
 import { parseRequest } from "../ParseRequest/parseRequest";
 
-async function getAllUsers(
-  req: http.IncomingMessage,
-  res: http.ServerResponse
-) {
+async function getAllUsers(req: IncomingMessage, res: ServerResponse) {
   try {
     const allUsers = await getAllUsersFromDB();
     createResponse(HTTP_CODE.OK, allUsers, res);
   } catch (err) {
     createResponse(
       HTTP_CODE.INTERNAL_SERVER_ERROR,
-      { message: "Server error, couldn't get all users." },
+      {
+        message:
+          ERROR_MESSAGES.INTERNAL_SERVER_ERROR +
+          ERROR_MESSAGES.RESOURCE_NOT_FOUND,
+      },
       res
     );
   }
 }
 
-async function createUser(req: http.IncomingMessage, res: http.ServerResponse) {
+async function createUser(req: IncomingMessage, res: ServerResponse) {
   try {
     const content = await parseRequest(req, res);
     const { username, age, hobbies } = content;
@@ -34,7 +35,7 @@ async function createUser(req: http.IncomingMessage, res: http.ServerResponse) {
     if (!username || !age || !hobbies)
       return createResponse(
         HTTP_CODE.BAD_REQUEST,
-        { message: "not all fields are specified" },
+        { message: ERROR_MESSAGES.BODY_VALIDATION },
         res
       );
 
@@ -48,22 +49,22 @@ async function createUser(req: http.IncomingMessage, res: http.ServerResponse) {
   } catch (err) {
     createResponse(
       HTTP_CODE.INTERNAL_SERVER_ERROR,
-      "Internal server error",
+      ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       res
     );
   }
 }
 
 async function getUserById(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
+  req: IncomingMessage,
+  res: ServerResponse,
   id: string
 ) {
   const user = await getUserByIdFromDB(id);
   if (!user)
     return createResponse(
       HTTP_CODE.NOT_FOUND,
-      { message: "user with such id doesn't exist" },
+      { message: ERROR_MESSAGES.USER_NOT_FOUND },
       res
     );
 
@@ -71,29 +72,29 @@ async function getUserById(
 }
 
 async function deleteUserById(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
+  req: IncomingMessage,
+  res: ServerResponse,
   id: string
 ) {
   const user = await getUserByIdFromDB(id);
   if (!user)
     return createResponse(
       HTTP_CODE.NOT_FOUND,
-      { message: "user with such id doesn't exist" },
+      { message: ERROR_MESSAGES.USER_NOT_FOUND },
       res
     );
 
   await deleteUserByIdInDB(id);
   createResponse(
     HTTP_CODE.NO_CONTENT,
-    { message: `user ${id} has been removed` },
+    { message: `Complete. User ${id} has been removed.` },
     res
   );
 }
 
 async function updateUserById(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
+  req: IncomingMessage,
+  res: ServerResponse,
   id: string
 ) {
   try {
@@ -101,7 +102,7 @@ async function updateUserById(
     if (!user)
       return createResponse(
         HTTP_CODE.NOT_FOUND,
-        { message: "user with such id doesn't exist" },
+        { message: ERROR_MESSAGES.USER_NOT_FOUND },
         res
       );
 
@@ -118,7 +119,7 @@ async function updateUserById(
   } catch (err) {
     createResponse(
       HTTP_CODE.INTERNAL_SERVER_ERROR,
-      "Internal server error",
+      ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       res
     );
   }

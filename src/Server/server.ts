@@ -10,7 +10,14 @@ import {
   deleteUserById,
   updateUserById,
 } from "../Controller/controllerUser";
-import { HTTP_CODE } from "../Constants/constants";
+import { HTTP_CODE, ERROR_MESSAGES } from "../Constants/constants";
+
+const API = {
+  GET: "GET",
+  POST: "POST",
+  DELETE: "DELETE",
+  PUT: "PUT",
+};
 
 const PATH_ENV = path.resolve(process.cwd(), ".env");
 dotenv.config({ path: PATH_ENV });
@@ -25,9 +32,9 @@ const server = http
     try {
       if (!request.url) return notFoundResponse(request.url ?? "", response);
 
-      if (request.url == "/api/users") {
-        if (request.method == "GET") return getAllUsers(request, response);
-        if (request.method == "POST") return createUser(request, response);
+      if (request.url === "/api/users") {
+        if (request.method === API.GET) return getAllUsers(request, response);
+        if (request.method === API.POST) return createUser(request, response);
       }
 
       if (request.url.startsWith("/api/users/")) {
@@ -35,31 +42,31 @@ const server = http
         if (!validate(uuid))
           return createResponse(
             HTTP_CODE.BAD_REQUEST,
-            `${uuid} is not a valid uuid`,
+            ERROR_MESSAGES.USERID_INVALID,
             response
           );
 
-        if (request.method == "DELETE")
+        if (request.method === API.DELETE)
           return deleteUserById(request, response, uuid);
-        if (request.method == "PUT")
+        if (request.method === API.PUT)
           return updateUserById(request, response, uuid);
-        if (request.method == "GET")
+        if (request.method === API.GET)
           return getUserById(request, response, uuid);
       }
       return notFoundResponse(request.url ?? "", response);
     } catch (err) {
       createResponse(
         HTTP_CODE.INTERNAL_SERVER_ERROR,
-        { message: "Server error" },
+        { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
         response
       );
     }
   })
   .on("error", (err) => {
-    console.log(`unhandled exception, error: ${JSON.stringify(err)}`);
+    console.log(`${ERROR_MESSAGES.UNEXPECTED_ERROR} ${JSON.stringify(err)}`);
   })
   .on("clientError", (err, socket) => {
-    socket.end("HTTP/1.1 500 internal server error\r\n\r\n");
+    socket.end(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
   });
 
 export { server };
