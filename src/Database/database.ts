@@ -30,24 +30,18 @@ async function updateUserInDB(userData: IUser): Promise<IUser> {
   return new Promise((resolve, reject) => {
     const index = usersDatabase.findIndex((user) => userData.id === user.id);
     usersDatabase[index] = { ...userData, id: userData.id };
-    //if (index) {
     resolve(usersDatabase[index]);
-    /*  } else {
-      reject(null);
-    } */
   });
 }
 
-async function deleteUserByIdInDB(id: string): Promise<boolean> {
+async function deleteUserByIdInDB(id: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    /*  usersDatabase = usersDatabase.filter((user) => user.id !== id);
-    resolve(); */
     const index = usersDatabase.findIndex((user) => id === user.id);
     if (index) {
       usersDatabase.splice(index, 1);
-      resolve(true);
+      resolve();
     } else {
-      reject(false);
+      reject();
     }
   });
 }
