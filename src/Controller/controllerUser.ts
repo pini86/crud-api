@@ -6,10 +6,9 @@ import {
   updateUserInDB,
   deleteUserByIdInDB,
 } from "../Database/database";
-import { createResponse } from "../Utils/utils";
+import { createResponse, checkUser } from "../Utils/utils";
 import { HTTP_CODE, ERROR_MESSAGES } from "../Constants/constants";
 import { parseRequest } from "../ParseRequest/parseRequest";
-import { IUser } from "../Interfaces/user";
 
 async function getAllUsers(req: IncomingMessage, res: ServerResponse) {
   try {
@@ -18,11 +17,7 @@ async function getAllUsers(req: IncomingMessage, res: ServerResponse) {
   } catch (err) {
     createResponse(
       HTTP_CODE.INTERNAL_SERVER_ERROR,
-      {
-        message:
-          ERROR_MESSAGES.INTERNAL_SERVER_ERROR +
-          ERROR_MESSAGES.RESOURCE_NOT_FOUND,
-      },
+      ERROR_MESSAGES.INTERNAL_SERVER_ERROR + ERROR_MESSAGES.RESOURCE_NOT_FOUND,
       res
     );
   }
@@ -31,25 +26,18 @@ async function getAllUsers(req: IncomingMessage, res: ServerResponse) {
 async function createUser(req: IncomingMessage, res: ServerResponse) {
   try {
     const content = await parseRequest(req, res);
+
     let { username, age, hobbies } = content;
 
     username = username.trim();
-    hobbies = hobbies.map((item) => item.trim());
 
-    if (
-      !username ||
-      !age ||
-      !hobbies ||
-      typeof age !== "number" ||
-      typeof username !== "string" ||
-      !Array.isArray(hobbies) ||
-      (hobbies.length !== 0 && hobbies.some((item) => typeof item !== "string"))
-    )
+    if (!checkUser(content)) {
       return createResponse(
         HTTP_CODE.BAD_REQUEST,
-        { message: ERROR_MESSAGES.BODY_VALIDATION },
+        ERROR_MESSAGES.BODY_VALIDATION,
         res
       );
+    }
 
     const newUser = await createNewUserInDB({
       id: "",
@@ -59,11 +47,7 @@ async function createUser(req: IncomingMessage, res: ServerResponse) {
     });
     createResponse(HTTP_CODE.CREATED, newUser, res);
   } catch (err) {
-    createResponse(
-      HTTP_CODE.INTERNAL_SERVER_ERROR,
-      { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
-      res
-    );
+    createResponse(HTTP_CODE.BAD_REQUEST, ERROR_MESSAGES.BODY_VALIDATION, res);
   }
 }
 
@@ -77,17 +61,13 @@ async function getUserById(
     if (!user)
       return createResponse(
         HTTP_CODE.NOT_FOUND,
-        { message: ERROR_MESSAGES.USER_NOT_FOUND },
+        ERROR_MESSAGES.USER_NOT_FOUND,
         res
       );
 
     createResponse(HTTP_CODE.OK, user, res);
   } catch (err) {
-    createResponse(
-      HTTP_CODE.INTERNAL_SERVER_ERROR,
-      { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
-      res
-    );
+    createResponse(HTTP_CODE.NOT_FOUND, ERROR_MESSAGES.USER_NOT_FOUND, res);
   }
 }
 
@@ -98,25 +78,19 @@ async function deleteUserById(
 ) {
   try {
     const user = await getUserByIdFromDB(id);
+
     if (!user)
       return createResponse(
         HTTP_CODE.NOT_FOUND,
-        { message: ERROR_MESSAGES.USER_NOT_FOUND },
+        ERROR_MESSAGES.USER_NOT_FOUND,
         res
       );
 
     await deleteUserByIdInDB(id);
-    createResponse(
-      HTTP_CODE.NO_CONTENT,
-      { message: `Complete. User ${id} has been removed.` },
-      res
-    );
+
+    createResponse(HTTP_CODE.NO_CONTENT, "", res);
   } catch (err) {
-    createResponse(
-      HTTP_CODE.INTERNAL_SERVER_ERROR,
-      { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
-      res
-    );
+    createResponse(HTTP_CODE.NOT_FOUND, ERROR_MESSAGES.USER_NOT_FOUND, res);
   }
 }
 
@@ -130,26 +104,30 @@ async function updateUserById(
     if (!user)
       return createResponse(
         HTTP_CODE.NOT_FOUND,
-        { message: ERROR_MESSAGES.USER_NOT_FOUND },
+        ERROR_MESSAGES.USER_NOT_FOUND,
         res
       );
 
     const { username, age, hobbies } = await parseRequest(req, res);
     const userNewData = {
       id,
-      username: username ?? user.username,
-      age: +age ?? user.age,
-      hobbies: hobbies ?? user.hobbies,
+      username,
+      age,
+      hobbies,
     };
+
+    if (!checkUser(userNewData)) {
+      return createResponse(
+        HTTP_CODE.BAD_REQUEST,
+        ERROR_MESSAGES.BODY_VALIDATION,
+        res
+      );
+    }
 
     const updatedUser = await updateUserInDB(userNewData);
     createResponse(HTTP_CODE.OK, updatedUser, res);
   } catch (err) {
-    createResponse(
-      HTTP_CODE.INTERNAL_SERVER_ERROR,
-      { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
-      res
-    );
+    createResponse(HTTP_CODE.NOT_FOUND, ERROR_MESSAGES.USER_NOT_FOUND, res);
   }
 }
 

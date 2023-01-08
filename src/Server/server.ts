@@ -28,13 +28,15 @@ process.on("uncaughtException", (err) => console.log(err));
 const PORT: number | string = process.env.PORT ?? 4000;
 
 const server = http
-  .createServer({ insecureHTTPParser: true }, (request, response) => {
+  .createServer({ insecureHTTPParser: true }, async (request, response) => {
     try {
       if (!request.url) return notFoundResponse(request.url ?? "", response);
 
       if (request.url === "/api/users") {
-        if (request.method === API.GET) return getAllUsers(request, response);
-        if (request.method === API.POST) return createUser(request, response);
+        if (request.method === API.GET)
+          return await getAllUsers(request, response);
+        if (request.method === API.POST)
+          return await createUser(request, response);
       }
 
       if (request.url.startsWith("/api/users/")) {
@@ -47,17 +49,17 @@ const server = http
           );
 
         if (request.method === API.DELETE)
-          return deleteUserById(request, response, uuid);
+          return await deleteUserById(request, response, uuid);
         if (request.method === API.PUT)
-          return updateUserById(request, response, uuid);
+          return await updateUserById(request, response, uuid);
         if (request.method === API.GET)
-          return getUserById(request, response, uuid);
+          return await getUserById(request, response, uuid);
       }
       return notFoundResponse(request.url ?? "", response);
     } catch (err) {
       createResponse(
         HTTP_CODE.INTERNAL_SERVER_ERROR,
-        { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
+        ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
         response
       );
     }

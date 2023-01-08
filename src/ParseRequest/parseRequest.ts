@@ -19,8 +19,8 @@ const parseRequest = async (
             resolve(JSON.parse(content));
           } catch (err) {
             createResponse(
-              HTTP_CODE.INTERNAL_SERVER_ERROR,
-              { message: ERROR_MESSAGES.BODY_INVALID_FORMAT },
+              HTTP_CODE.BAD_REQUEST,
+              ERROR_MESSAGES.BODY_INVALID_FORMAT,
               response
             );
             reject(err);
@@ -30,7 +30,7 @@ const parseRequest = async (
     } catch (err) {
       createResponse(
         HTTP_CODE.INTERNAL_SERVER_ERROR,
-        { message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
+        ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
         response
       );
       reject(err);

@@ -37,7 +37,7 @@ async function updateUserInDB(userData: IUser): Promise<IUser> {
 async function deleteUserByIdInDB(id: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const index = usersDatabase.findIndex((user) => id === user.id);
-    if (index) {
+    if (index !== -1) {
       usersDatabase.splice(index, 1);
       resolve();
     } else {
