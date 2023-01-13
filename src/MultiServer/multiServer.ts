@@ -4,6 +4,8 @@ import * as path from "path";
 import * as http from "http";
 import * as dotenv from "dotenv";
 import { HTTP_CODE } from "../Constants/constants";
+import { usersDatabase, refreshDB } from "../Database/database";
+import { IMessage } from "../Interfaces/user";
 
 const SERVER_PATH = "../Server/server";
 const PATH_ENV = path.resolve(process.cwd(), ".env");
@@ -22,6 +24,7 @@ void (async () => {
     for (let i = 0; i < countCpus; i++) {
       cluster.fork({ PORT: +PORT + 1 + i });
     }
+
     http
       .createServer(function (request, response) {
         response
@@ -29,7 +32,7 @@ void (async () => {
             Location: `http://localhost:${currentPort}` + request.url,
           })
           .end(() => {
-            console.log(`Request resend on port ${currentPort}`);
+            console.log(`Request forwarded on port ${currentPort}`);
             currentPort = ++currentPort;
             if (currentPort > +PORT + countCpus) {
               currentPort = currentPort - countCpus;
@@ -40,9 +43,16 @@ void (async () => {
     cluster.on("exit", (worker, code, signal) => {
       console.log(`Worker ${worker.process.pid} died, R.I.P.`);
     });
+    cluster.on("message", async (worker, message: IMessage) => {
+      if (message.cmd === "refresh") {
+        worker.send(JSON.stringify(usersDatabase));
+      } else {
+        refreshDB(message.data);
+      }
+    });
   } else {
     await import(SERVER_PATH).then(() =>
-      console.log(`Worker ${process.pid} started`)
+      console.log(`Worker ${process.pid} started,`)
     );
   }
 })();

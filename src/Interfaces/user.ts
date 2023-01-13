@@ -5,4 +5,9 @@ interface IUser {
   hobbies: string[];
 }
 
-export { IUser };
+interface IMessage {
+  cmd: string;
+  data: string;
+}
+
+export { IUser, IMessage };
